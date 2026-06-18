@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,400;1,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --pp:  #7C5CFC; --pp2: #9B7EFD; --pp3: #6344E8;
+  --vb:  #0A0A0F; --vb2: #111118; --vb3: #1A1A24; --vb4: #22222E;
+  --sw:  #F7F7FB; --gg:  #8A8B9A; --gg2: #6A6B7A; --gg3: #4A4B5A;
+  --fl:  #EBE0FF; --fl2: rgba(235,224,255,0.10); --fl3: rgba(235,224,255,0.06);
+  --bg:  #10B981; --bg2: rgba(16,185,129,0.12);
+  --wa:  #F59E0B; --err: #EF4444; --ae:  #C67B5C;
+  --b0:  rgba(255,255,255,0.06); --b1: rgba(255,255,255,0.10); --bacc: rgba(124,92,252,0.30);
+  --gl1: rgba(255,255,255,0.04); --gl2: rgba(255,255,255,0.06); --gl3: rgba(255,255,255,0.09);
+  --sh-acc: 0 8px 32px rgba(124,92,252,0.28);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--vb);
+  color: var(--sw);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--b1); border-radius: 2px; }
+
+/* Mesh bg */
+.mesh-bg::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70vw 60vh at 15% 0%,  rgba(124,92,252,0.12) 0%, transparent 65%),
+    radial-gradient(ellipse 50vw 50vh at 85% 0%,  rgba(124,92,252,0.07) 0%, transparent 65%),
+    radial-gradient(ellipse 60vw 40vh at 50% 100%, rgba(16,185,129,0.05) 0%, transparent 65%);
+}
+
+/* Glass card */
+.glass {
+  background: linear-gradient(135deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025));
+  border: 1px solid var(--b0);
+  position: relative;
+  overflow: hidden;
+}
+.glass::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(124,92,252,0.25), transparent);
+  pointer-events: none; z-index: 1;
+}
+
+/* Animations */
+@keyframes fadeUp   { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
+@keyframes ghostFloat { 0%,100% { transform:translateY(0) rotate(-1.5deg) } 50% { transform:translateY(-16px) rotate(1.5deg) } }
+@keyframes spin     { to { transform: rotate(360deg) } }
+@keyframes pulse    { 0%,100% { opacity:1 } 50% { opacity:0.3 } }
+@keyframes blink    { 0%,100% { opacity:1 } 50% { opacity:0.3 } }
+@keyframes shimmer  { from { left:-100% } to { left:100% } }
+
+.animate-fade-up    { animation: fadeUp 0.24s ease both; }
+.animate-ghost-float { animation: ghostFloat 4s ease-in-out infinite; }
+.animate-spin-slow  { animation: spin 0.7s linear infinite; }
+.animate-pulse-dot  { animation: pulse 2s ease infinite; }
+.animate-blink      { animation: blink 2s ease infinite; }
+
+/* Shimmer button effect */
+.btn-shimmer::after {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  transition: left 0.5s ease;
+}
+.btn-shimmer:hover::after { left: 100%; }
