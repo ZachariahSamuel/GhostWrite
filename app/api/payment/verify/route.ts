@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { tierMeta, type TierId } from '@/lib/payment'
 
 function getSupabase() {
   const cookieStore = cookies()
@@ -40,9 +41,9 @@ async function verifyPaystack(reference: string): Promise<boolean> {
   return data.status && data.data?.status === 'success'
 }
 
-async function activatePro(userId: string, sb: any) {
+async function activatePro(userId: string, sb: any, months: number) {
   const nextBilling = new Date()
-  nextBilling.setMonth(nextBilling.getMonth() + 1)
+  nextBilling.setMonth(nextBilling.getMonth() + months)
   await sb.from('profiles').update({
     plan:'pro', credits_total:999999, credits_used:0,
     next_billing:nextBilling.toISOString(), updated_at:new Date().toISOString(),
@@ -78,7 +79,8 @@ export async function POST(req: NextRequest) {
   }
 
   await sb.from('payments').update({ status:'complete', completed_at:new Date().toISOString() }).eq('reference', reference)
-  await activatePro(user.id, sb)
+  const months = tierMeta(((payment.tier || 'monthly') as TierId)).months
+  await activatePro(user.id, sb, months)
 
-  return NextResponse.json({ success:true, plan:'pro' })
+  return NextResponse.json({ success:true, plan:'pro', tier: payment.tier || 'monthly', months })
 }

@@ -1,11 +1,12 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
+import { Key } from 'iconoir-react'
 import { useDash } from '../layout'
 
 type Msg = { role:'user'|'assistant'; content:string; model?:string }
 
 const MODEL_OPTIONS = [
-  { key:'ghostall', label:'👻 GhostAll',  desc:'All free models synthesized', free:true  },
+  { key:'ghostall', label:'GhostAll',     desc:'Blends the free Groq models', free:true  },
   { key:'llama3',   label:'Llama 3.3',   desc:'Groq — fast, free',           free:true  },
   { key:'mixtral',  label:'Mixtral 8x7B',desc:'Groq — strong reasoning',     free:true  },
   { key:'gemma2',   label:'Gemma 2',     desc:'Groq — efficient',            free:true  },
@@ -17,10 +18,11 @@ const MODEL_OPTIONS = [
 ]
 
 export default function ChatPage() {
-  const { groqKey, ghostRef } = useDash()
+  const { groqKey, ghostRef, user } = useDash()
+  const initials = user?.name?.split(' ').map((p:string)=>p[0]).join('').toUpperCase().slice(0,2) || 'You'
   const [msgs,    setMsgs]    = useState<Msg[]>([{
     role:'assistant',
-    content:"Hello. I'm GhostWrite — invisible craft, visible results. GhostAll synthesizes responses from Llama 3.3, Mixtral, and Gemma simultaneously for the strongest answer. Add an OpenRouter key to unlock GPT-4o, Claude, and Gemini. What would you like to write?",
+    content:"yo, I'm Casper 👻 GhostAll blends answers from Llama 3.3, Mixtral and Gemma — free via your Groq key. Add an OpenRouter key to pull in GPT-4o, Claude and Gemini. what are we cooking today?",
   }])
   const [input,         setInput]         = useState('')
   const [busy,          setBusy]          = useState(false)
@@ -55,7 +57,6 @@ export default function ChatPage() {
     setBusy(true)
     ghostRef.current?.setState('writing')
 
-    // Optimistic placeholder
     setMsgs(m => [...m, { role:'assistant', content:'', model:activeModel }])
 
     try {
@@ -75,19 +76,11 @@ export default function ChatPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Chat failed')
 
-      setMsgs(m => [...m.slice(0,-1), {
-        role: 'assistant',
-        content: data.reply,
-        model: data.model,
-      }])
+      setMsgs(m => [...m.slice(0,-1), { role: 'assistant', content: data.reply, model: data.model }])
       ghostRef.current?.setState('success')
       setTimeout(() => ghostRef.current?.setState('idle'), 1800)
     } catch(e: any) {
-      setMsgs(m => [...m.slice(0,-1), {
-        role:'assistant',
-        content:`Error: ${e.message}`,
-        model: activeModel,
-      }])
+      setMsgs(m => [...m.slice(0,-1), { role:'assistant', content:`Error: ${e.message}`, model: activeModel }])
       ghostRef.current?.setState('error')
       setTimeout(() => ghostRef.current?.setState('idle'), 2000)
     }
@@ -98,29 +91,26 @@ export default function ChatPage() {
   const needsOR  = modelCfg && !modelCfg.free && !openrouterKey
 
   return (
-    <div className="flex flex-col h-full animate-fade-up" style={{ maxHeight:'calc(100vh - 130px)' }}>
+    <div className="flex flex-col h-full animate-fade-up max-w-4xl mx-auto w-full" style={{ maxHeight:'calc(100vh - 130px)' }}>
 
       {/* Model selector */}
       <div className="flex gap-2 flex-wrap mb-3 shrink-0">
         {MODEL_OPTIONS.map(m => (
           <button key={m.key} onClick={() => setActiveModel(m.key)}
             title={m.desc}
-            className={`px-3 py-1.5 rounded-full font-label font-semibold text-[11px] border transition-all
+            className={`btn px-3 py-1.5 text-[11px] rounded-full border-2 border-ink
               ${activeModel === m.key
-                ? 'bg-fl/10 border-pp/30 text-fl'
-                : m.free
-                  ? 'bg-white/4 border-white/8 text-gg2 hover:border-white/15 hover:text-gg'
-                  : 'bg-white/3 border-white/6 text-gg3 hover:border-white/12 hover:text-gg2'}`}>
+                ? 'bg-blue text-white'
+                : m.free ? 'bg-paper3 text-ink2 hover:bg-paper2' : 'bg-paper2 text-mute hover:bg-paper3'}`}>
             {m.label}
             {!m.free && <span className="ml-1 text-[9px] opacity-60">OR</span>}
           </button>
         ))}
         <button onClick={() => setShowKeyInput(!showKeyInput)}
-          className={`px-3 py-1.5 rounded-full font-label font-semibold text-[11px] border transition-all ml-auto
-            ${openrouterKey
-              ? 'bg-bg/10 border-bg/25 text-bg'
-              : 'bg-white/4 border-white/8 text-gg2 hover:bg-white/8'}`}>
-          {openrouterKey ? '🔑 OR Connected' : '🔑 Add OpenRouter key'}
+          className={`btn inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] rounded-full border-2 border-ink ml-auto
+            ${openrouterKey ? 'bg-mint text-white' : 'bg-paper3 text-ink2 hover:bg-paper2'}`}>
+          <Key className="w-3 h-3" aria-hidden />
+          {openrouterKey ? 'OR Connected' : 'Add OpenRouter key'}
         </button>
       </div>
 
@@ -130,22 +120,16 @@ export default function ChatPage() {
           <input
             defaultValue={openrouterKey}
             placeholder="sk-or-xxxxxxxxxxxxxxxx — get free key at openrouter.ai"
-            className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2
-              text-sw text-[12.5px] outline-none focus:border-pp transition-all placeholder:text-gg3 font-body"
+            className="flex-1 bg-paper border-2 border-ink rounded-full px-4 py-2 text-ink text-[12.5px] outline-none focus:bg-paper3 transition-colors placeholder:text-mute font-body"
             id="or-key-inp"
           />
           <button
-            onClick={() => {
-              const v = (document.getElementById('or-key-inp') as HTMLInputElement).value.trim()
-              if (v) saveOpenRouterKey(v)
-            }}
-            className="px-5 py-2 rounded-full font-label font-bold text-[12px] text-white
-              bg-pp hover:bg-pp2 transition-all shadow-[0_3px_10px_rgba(124,92,252,0.28)]">
+            onClick={() => { const v = (document.getElementById('or-key-inp') as HTMLInputElement).value.trim(); if (v) saveOpenRouterKey(v) }}
+            className="btn btn-primary px-5 py-2 text-[12px] rounded-full">
             Save
           </button>
           <button onClick={() => setShowKeyInput(false)}
-            className="px-4 py-2 rounded-full font-label font-semibold text-[12px]
-              text-gg bg-white/5 border border-white/8 hover:bg-white/10">
+            className="btn btn-ghost px-4 py-2 text-[12px] rounded-full border-2 border-ink">
             Cancel
           </button>
         </div>
@@ -153,31 +137,27 @@ export default function ChatPage() {
 
       {/* OpenRouter warning */}
       {needsOR && (
-        <div className="px-4 py-3 rounded-xl bg-wa/8 border border-wa/25 text-wa text-[13px]
-          font-label mb-3 shrink-0 flex items-center justify-between gap-3">
+        <div className="px-4 py-3 rounded-xl2 bg-sun border-2 border-ink text-ink text-[13px] font-medium mb-3 shrink-0 flex items-center justify-between gap-3">
           <span>{modelCfg.label} requires an OpenRouter key. Add one above, or switch to a free model.</span>
           <button onClick={() => setActiveModel('ghostall')}
-            className="text-[11px] font-bold whitespace-nowrap bg-wa/10 border border-wa/25
-              px-3 py-1.5 rounded-full hover:bg-wa/20 transition-all">
+            className="btn btn-ink text-[11px] whitespace-nowrap px-3 py-1.5 rounded-full">
             Use GhostAll
           </button>
         </div>
       )}
 
       {/* Messages */}
-      <div className="glass rounded-xl flex flex-col flex-1 min-h-0">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/6 shrink-0">
+      <div className="b-card rounded-xl3 flex flex-col flex-1 min-h-0">
+        <div className="flex items-center justify-between px-4 py-3 border-b-2 border-ink shrink-0">
           <div className="flex items-center gap-2">
-            <span className="font-label font-bold text-[10px] text-gg2 uppercase tracking-widest">Conversation</span>
-            <span className="px-2 py-0.5 rounded-full font-label font-semibold text-[9.5px]
-              bg-pp/10 border border-pp/25 text-pp2">
+            <span className="eyebrow text-[10px] text-coral">Conversation</span>
+            <span className="px-2 py-0.5 rounded-full font-mono font-semibold text-[9.5px] bg-blue text-white border-2 border-ink">
               {modelCfg?.label || 'GhostAll'}
             </span>
           </div>
           <button
             onClick={() => setMsgs([{ role:'assistant', content:'Chat cleared. Ready.' }])}
-            className="px-3 py-1 rounded-full text-[11px] font-label font-semibold
-              text-gg bg-white/5 border border-white/8 hover:bg-white/10 transition-all">
+            className="btn btn-ghost px-3 py-1 text-[11px] rounded-full border-2 border-ink">
             Clear
           </button>
         </div>
@@ -185,28 +165,23 @@ export default function ChatPage() {
         <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
           {msgs.map((m, i) => (
             <div key={i} className={`flex gap-2.5 items-end animate-fade-up ${m.role==='user'?'flex-row-reverse':''}`}>
-              <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center
-                font-label font-bold text-[10px] text-white
-                ${m.role==='user'
-                  ? 'bg-gradient-to-br from-ae to-[#8B4513]'
-                  : 'bg-gradient-to-br from-pp to-pp3 shadow-[0_2px_8px_rgba(124,92,252,0.28)]'}`}>
-                {m.role==='user' ? 'ZM' : 'GW'}
+              <div className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center border-2 border-ink
+                font-mono font-bold text-[10px] text-white ${m.role==='user' ? 'bg-coral' : 'bg-blue'}`}>
+                {m.role==='user' ? initials : 'GW'}
               </div>
               <div className="flex flex-col gap-1 max-w-[78%]">
                 {m.role==='assistant' && m.model && m.content && (
-                  <span className="text-[9.5px] font-label text-gg3 px-1">
+                  <span className="text-[9.5px] font-mono text-mute px-1">
                     {MODEL_OPTIONS.find(o=>o.key===m.model)?.label || m.model}
                   </span>
                 )}
-                <div className={`px-3.5 py-2.5 text-[13px] leading-[1.65] border rounded-2xl
-                  ${m.role==='user'
-                    ? 'bg-fl/5 border-pp/20 text-sw rounded-tr-sm'
-                    : 'bg-white/5 border-white/8 text-sw rounded-tl-sm'}`}>
+                <div className={`px-3.5 py-2.5 text-[13px] leading-[1.65] border-2 border-ink rounded-xl2
+                  ${m.role==='user' ? 'bg-paper2 text-ink rounded-tr-sm' : 'bg-paper3 text-ink rounded-tl-sm'}`}>
                   {m.content
                     ? m.content
                     : busy && i === msgs.length-1
-                      ? <span className="flex items-center gap-2 text-gg">
-                          <span className="w-3 h-3 border-2 border-gg/30 border-t-gg rounded-full animate-spin"/>
+                      ? <span className="flex items-center gap-2 text-ink2">
+                          <span className="w-3 h-3 border-2 border-ink/30 border-t-ink rounded-full animate-spin"/>
                           {activeModel==='ghostall' ? 'Synthesizing 3 models…' : `${modelCfg?.label} thinking…`}
                         </span>
                       : null}
@@ -217,25 +192,19 @@ export default function ChatPage() {
           <div ref={bottomRef} />
         </div>
 
-        <div className="flex gap-2.5 px-4 py-3 border-t border-white/6 bg-vb2/50 shrink-0">
+        <div className="flex gap-2.5 px-4 py-3 border-t-2 border-ink bg-paper2 shrink-0 rounded-b-xl3">
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()} }}
             placeholder={
-              needsOR
-                ? `Add OpenRouter key to use ${modelCfg?.label}…`
-                : "Write anything — your ideas, amplified invisibly…"
+              needsOR ? `Add OpenRouter key to use ${modelCfg?.label}…` : "Drop your idea — we'll amplify it, lowkey invisibly…"
             }
             disabled={!!needsOR}
-            className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2.5
-              text-sw text-[13.5px] outline-none focus:border-pp transition-all
-              placeholder:text-gg3 font-body disabled:opacity-40"
+            className="flex-1 bg-paper border-2 border-ink rounded-full px-4 py-2.5 text-ink text-[13.5px] outline-none focus:bg-paper3 transition-colors placeholder:text-mute font-body disabled:opacity-40"
           />
           <button onClick={send} disabled={busy || !input.trim() || !!needsOR}
-            className="px-5 py-2.5 rounded-full font-label font-bold text-[13px] text-white
-              bg-pp hover:bg-pp2 transition-all shadow-[0_3px_10px_rgba(124,92,252,0.30)]
-              disabled:opacity-40 whitespace-nowrap">
+            className="btn btn-primary px-5 py-2.5 text-[13px] rounded-full disabled:opacity-40 whitespace-nowrap">
             Send →
           </button>
         </div>

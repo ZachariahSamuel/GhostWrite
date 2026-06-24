@@ -40,11 +40,15 @@ CREATE TABLE IF NOT EXISTS public.payments (
   provider     TEXT NOT NULL CHECK (provider IN ('dpo','paystack')),
   amount       NUMERIC NOT NULL,
   currency     TEXT NOT NULL DEFAULT 'BWP',
+  tier         TEXT NOT NULL DEFAULT 'monthly' CHECK (tier IN ('monthly','semester','annual','pro')),
   status       TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','complete','failed','refunded')),
   reference    TEXT UNIQUE NOT NULL,
   completed_at TIMESTAMPTZ,
   created_at   TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- If the payments table already exists, add the tier column:
+ALTER TABLE public.payments ADD COLUMN IF NOT EXISTS tier TEXT NOT NULL DEFAULT 'monthly';
 
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 

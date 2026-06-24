@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
@@ -7,7 +7,7 @@ import type { GhostRiveHandle } from '@/components/ghost/GhostRive'
 
 const GhostRive = dynamic(() => import('@/components/ghost/GhostRive'), { ssr:false })
 
-export default function PaymentSuccess() {
+function PaymentSuccessContent() {
   const searchParams = useSearchParams()
   const router        = useRouter()
   const ghostRef       = useRef<GhostRiveHandle>(null)
@@ -49,47 +49,45 @@ export default function PaymentSuccess() {
   }, [])
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 bg-vb">
-      <div className="max-w-sm w-full text-center">
+    <div className="min-h-screen flex items-center justify-center px-6 bg-paper">
+      <div className="b-card max-w-sm w-full text-center rounded-xl3 p-8">
         <div className="flex justify-center mb-6">
           <GhostRive ref={ghostRef} width={140} height={140}
-            logoSrc="/ghost-logo.png" riv="/ghostwrite.riv" initialState="loading" />
+            initialState="loading" />
         </div>
         {status === 'verifying' && (
           <>
-            <h2 className="font-display font-black text-[24px] text-sw mb-3 tracking-[-0.5px]">Confirming payment…</h2>
-            <p className="text-gg text-[14px] leading-relaxed">Verifying your payment with the provider. This takes just a moment.</p>
+            <h2 className="font-display font-semibold text-[24px] text-ink mb-3 tracking-[-0.01em]">Confirming payment…</h2>
+            <p className="text-ink2 text-[14px] leading-relaxed font-medium">Verifying your payment with the provider. This takes just a moment.</p>
           </>
         )}
         {status === 'success' && (
           <>
-            <div className="w-16 h-16 rounded-full bg-bg/10 border border-bg/25 flex items-center justify-center text-3xl mx-auto mb-5">🎉</div>
-            <h2 className="font-display font-black text-[26px] text-sw mb-3 tracking-[-0.5px]">Welcome to Pro!</h2>
-            <p className="text-gg text-[14px] leading-relaxed mb-5">
-              Your GhostWrite Pro plan is now active. Unlimited words, all three humanizer tiers, Writing DNA, and the full Africa Suite.
+            <div className="w-16 h-16 rounded-xl2 bg-mint border-2 border-ink shadow-b-xs flex items-center justify-center text-3xl mx-auto mb-5">🎉</div>
+            <h2 className="font-display font-semibold text-[26px] text-ink mb-3 tracking-[-0.01em]">Welcome to Pro!</h2>
+            <p className="text-ink2 text-[14px] leading-relaxed mb-5 font-medium">
+              Your GhostWrite Pro plan is now active. Unlimited words, all three humanizer tiers, Writing DNA, and the full Africa Suite. lock in.
             </p>
-            <div className="px-4 py-3 rounded-xl bg-bg/10 border border-bg/25 text-bg text-[13px] font-label font-semibold mb-6">
+            <div className="px-4 py-3 rounded-xl2 bg-mint border-2 border-ink text-white text-[13px] font-semibold mb-6">
               ✓ Redirecting to your dashboard…
             </div>
-            <Link href="/dashboard/humanizer" className="inline-flex px-8 py-3 rounded-full font-label font-bold text-[14px]
-              text-white bg-pp hover:bg-pp2 transition-all shadow-[0_4px_16px_rgba(124,92,252,0.35)]">
+            <Link href="/dashboard/humanizer" className="btn btn-primary inline-flex px-8 py-3 text-[14px] rounded-full">
               Go to dashboard →
             </Link>
           </>
         )}
         {status === 'error' && (
           <>
-            <div className="w-16 h-16 rounded-full bg-err/10 border border-err/25 flex items-center justify-center text-3xl mx-auto mb-5">⚠️</div>
-            <h2 className="font-display font-black text-[24px] text-sw mb-3 tracking-[-0.5px]">Payment not confirmed</h2>
-            <p className="text-gg text-[14px] leading-relaxed mb-5">
+            <div className="w-16 h-16 rounded-xl2 bg-coral border-2 border-ink shadow-b-xs flex items-center justify-center text-3xl mx-auto mb-5">⚠️</div>
+            <h2 className="font-display font-semibold text-[24px] text-ink mb-3 tracking-[-0.01em]">Payment not confirmed</h2>
+            <p className="text-ink2 text-[14px] leading-relaxed mb-5 font-medium">
               {message || 'We could not verify your payment. If you were charged, please contact support.'}
             </p>
             <div className="flex gap-3 justify-center flex-wrap">
-              <Link href="/dashboard/settings" className="px-6 py-2.5 rounded-full font-label font-bold text-[13px] text-white bg-pp hover:bg-pp2 transition-all">
+              <Link href="/dashboard/settings" className="btn btn-primary px-6 py-2.5 text-[13px] rounded-full">
                 Try again
               </Link>
-              <a href="mailto:support@ghostwrite.app" className="px-6 py-2.5 rounded-full font-label font-semibold text-[13px]
-                text-gg bg-white/5 border border-white/10 hover:bg-white/10 transition-all">
+              <a href="mailto:support@ghostwrite.app" className="btn btn-ghost px-6 py-2.5 text-[13px] rounded-full border-2 border-ink">
                 Contact support
               </a>
             </div>
@@ -97,5 +95,13 @@ export default function PaymentSuccess() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function PaymentSuccess() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-paper" />}>
+      <PaymentSuccessContent />
+    </Suspense>
   )
 }

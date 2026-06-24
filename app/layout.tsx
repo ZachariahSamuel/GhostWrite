@@ -1,11 +1,16 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import '../styles/globals.css'
 
 export const metadata: Metadata = {
   title: 'GhostWrite — Invisible craft. Visible results.',
-  description: 'GhostWrite transforms AI-generated drafts into authentically human prose — so undetectable, it feels like it was always yours.',
-  themeColor: '#0A0A0F',
+  description: 'Write in your own authentic voice and see exactly how your text reads against AI detectors — with real, DOI-verified citations. Built for students across Southern Africa.',
   manifest: '/manifest.json',
+}
+
+export const viewport: Viewport = {
+  themeColor: '#F4EFE6',
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -14,9 +19,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <link rel="icon" href="/icon-192.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
       </head>
-      <body className="mesh-bg min-h-screen bg-vb text-sw antialiased">
+
+      <body className="paper-grain riso-wash min-h-screen bg-paper text-ink antialiased">
         {children}
       </body>
     </html>

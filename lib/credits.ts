@@ -9,10 +9,16 @@ export const PLAN_LIMITS = {
   institution: 999999,
 }
 
-export async function checkCredits(wordsNeeded: number = 0): Promise<
-  { ok: true; userId: string; plan: string; used: number; total: number } |
-  { ok: false; response: NextResponse }
-> {
+export type CreditCheck = {
+  ok: boolean
+  userId: string
+  plan: string
+  used: number
+  total: number
+  response: NextResponse | null
+}
+
+export async function checkCredits(wordsNeeded: number = 0): Promise<CreditCheck> {
   const cookieStore = cookies()
   const sb = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,7 +35,7 @@ export async function checkCredits(wordsNeeded: number = 0): Promise<
   const { data: { user }, error: authErr } = await sb.auth.getUser()
   if (authErr || !user) {
     return {
-      ok: false,
+      ok: false, userId: '', plan: '', used: 0, total: 0,
       response: NextResponse.json({ error: 'Unauthorized. Please sign in.' }, { status: 401 })
     }
   }
@@ -42,7 +48,7 @@ export async function checkCredits(wordsNeeded: number = 0): Promise<
 
   if (profileErr || !profile) {
     // Profile may not exist yet — allow with free limits
-    return { ok: true, userId: user.id, plan: 'free', used: 0, total: PLAN_LIMITS.free }
+    return { ok: true, userId: user.id, plan: 'free', used: 0, total: PLAN_LIMITS.free, response: null }
   }
 
   const total = profile.credits_total ?? PLAN_LIMITS[profile.plan as keyof typeof PLAN_LIMITS] ?? PLAN_LIMITS.free
@@ -51,7 +57,7 @@ export async function checkCredits(wordsNeeded: number = 0): Promise<
   if (used + wordsNeeded > total) {
     const remaining = Math.max(0, total - used)
     return {
-      ok: false,
+      ok: false, userId: user.id, plan: profile.plan, used, total,
       response: NextResponse.json({
         error: `Credit limit reached. You have ${remaining} credits remaining this month.`,
         remaining,
@@ -61,7 +67,7 @@ export async function checkCredits(wordsNeeded: number = 0): Promise<
     }
   }
 
-  return { ok: true, userId: user.id, plan: profile.plan, used, total }
+  return { ok: true, userId: user.id, plan: profile.plan, used, total, response: null }
 }
 
 export async function consumeCredits(userId: string, words: number) {

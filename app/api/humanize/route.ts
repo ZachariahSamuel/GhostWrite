@@ -24,7 +24,7 @@ async function getDNA(userId: string) {
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get('authorization') || ''
   const groqKey    = (authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '') || process.env.GROQ_API_KEY
-  if (!groqKey) return NextResponse.json({ error:'No Groq API key. Add yours via the 🔑 button.' }, { status:401 })
+  if (!groqKey) return NextResponse.json({ error:'No Groq API key. Add yours via the key button in the top bar.' }, { status:401 })
 
   const body = await req.json().catch(() => null)
   if (!body?.text?.trim()) return NextResponse.json({ error:'No text provided.' }, { status:400 })

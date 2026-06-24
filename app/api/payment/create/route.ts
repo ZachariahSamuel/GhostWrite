@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { getAmount, getCurrency, getProvider, PLAN } from '@/lib/payment'
+import { getPrice, getCurrency, getProvider, tierMeta, PLAN_NAME, type TierId } from '@/lib/payment'
 
 function getSupabase() {
   const cookieStore = cookies()
@@ -17,7 +17,7 @@ function getSupabase() {
 }
 
 async function createDpoPayment(opts: {
-  amount:number; currency:string; email:string
+  amount:number; currency:string; email:string; description:string
   firstName:string; lastName:string; userId:string; appUrl:string
 }): Promise<{ url:string; token:string }> {
   const companyToken = process.env.DPO_COMPANY_TOKEN
@@ -39,7 +39,7 @@ async function createDpoPayment(opts: {
   <Services>
     <Service>
       <ServiceType>5525</ServiceType>
-      <ServiceDescription>${PLAN.description}</ServiceDescription>
+      <ServiceDescription>${opts.description}</ServiceDescription>
       <ServiceDate>${new Date().toISOString().split('T')[0]} 00:00</ServiceDate>
     </Service>
   </Services>
@@ -99,10 +99,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error:'Already on Pro plan.' }, { status:400 })
   }
 
+  const body = await req.json().catch(() => ({} as any))
+  const VALID: TierId[] = ['monthly', 'semester', 'annual', 'pro']
+  const tier: TierId = VALID.includes(body?.tier) ? body.tier : 'monthly'
+
   const country   = profile?.country || 'BW'
   const currency  = getCurrency(country)
-  const amount    = getAmount(currency)
+  const amount    = getPrice(country, tier)
   const provider  = getProvider(country)
+  const description = `${PLAN_NAME} ${tierMeta(tier).name}`
   const appUrl    = process.env.NEXT_PUBLIC_APP_URL || 'https://ghostwrite.app'
   const nameParts = (profile?.full_name || 'Ghost User').split(' ')
   const firstName = nameParts[0] || 'User'
@@ -111,16 +116,16 @@ export async function POST(req: NextRequest) {
   try {
     if (provider === 'dpo') {
       const { url, token } = await createDpoPayment({
-        amount, currency, email:user.email!, firstName, lastName, userId:user.id, appUrl,
+        amount, currency, email:user.email!, description, firstName, lastName, userId:user.id, appUrl,
       })
-      await sb.from('payments').insert({ user_id:user.id, provider:'dpo', amount, currency, status:'pending', reference:token })
-      return NextResponse.json({ url, provider:'dpo', amount, currency })
+      await sb.from('payments').insert({ user_id:user.id, provider:'dpo', amount, currency, tier, status:'pending', reference:token })
+      return NextResponse.json({ url, provider:'dpo', amount, currency, tier })
     } else {
       const { url, reference } = await createPaystackPayment({
         amount, currency, email:user.email!, userId:user.id, appUrl,
       })
-      await sb.from('payments').insert({ user_id:user.id, provider:'paystack', amount, currency, status:'pending', reference })
-      return NextResponse.json({ url, provider:'paystack', amount, currency })
+      await sb.from('payments').insert({ user_id:user.id, provider:'paystack', amount, currency, tier, status:'pending', reference })
+      return NextResponse.json({ url, provider:'paystack', amount, currency, tier })
     }
   } catch(e: any) {
     return NextResponse.json({ error: e.message }, { status:500 })

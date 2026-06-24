@@ -1,14 +1,15 @@
 {
-  "name": "GhostWrite",
+  "name": "GhostWrite — write in your own voice",
   "short_name": "GhostWrite",
-  "description": "Invisible craft. Visible results.",
-  "start_url": "/",
+  "description": "Write in your own authentic voice and see how your text reads against AI detectors. Built for students across Southern Africa.",
+  "start_url": "/dashboard/humanizer",
   "display": "standalone",
-  "background_color": "#0A0A0F",
-  "theme_color": "#7C5CFC",
+  "background_color": "#07070D",
+  "theme_color": "#8E6CFF",
   "orientation": "portrait",
   "icons": [
-    { "src": "/ghost-logo.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/ghost-logo.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

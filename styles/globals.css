@@ -1,78 +1,213 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,400;1,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+/* Fontshare: Clash Display (headlines) + General Sans (body). JetBrains Mono via Google. */
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@700,600,500,400&f[]=general-sans@400,500,600,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --pp:  #7C5CFC; --pp2: #9B7EFD; --pp3: #6344E8;
-  --vb:  #0A0A0F; --vb2: #111118; --vb3: #1A1A24; --vb4: #22222E;
-  --sw:  #F7F7FB; --gg:  #8A8B9A; --gg2: #6A6B7A; --gg3: #4A4B5A;
-  --fl:  #EBE0FF; --fl2: rgba(235,224,255,0.10); --fl3: rgba(235,224,255,0.06);
-  --bg:  #10B981; --bg2: rgba(16,185,129,0.12);
-  --wa:  #F59E0B; --err: #EF4444; --ae:  #C67B5C;
-  --b0:  rgba(255,255,255,0.06); --b1: rgba(255,255,255,0.10); --bacc: rgba(124,92,252,0.30);
-  --gl1: rgba(255,255,255,0.04); --gl2: rgba(255,255,255,0.06); --gl3: rgba(255,255,255,0.09);
-  --sh-acc: 0 8px 32px rgba(124,92,252,0.28);
+  /* ── Campus Press — warm paper + riso overprint + brutalist ink ── */
+  --paper:  #F4EFE6;   /* warm canvas */
+  --paper2: #ECE6D8;   /* deeper paper / inset */
+  --paper3: #FBF8F2;   /* lifted card */
+  --ink:    #1A1A17;   /* near-black, slightly warm */
+  --ink2:   #3A382F;   /* secondary ink / body */
+  --mute:   #76726A;   /* muted captions */
+  --line:   #1A1A17;   /* brutalist borders are ink */
+
+  --blue:   #2B44FF;   /* riso ultramarine — primary action */
+  --blue2:  #1B2ECC;
+  --coral:  #FF4D3D;   /* riso red */
+  --sun:    #FFC53D;   /* riso yellow */
+  --mint:   #14C98A;   /* score-positive */
+
+  --shadow: 6px 6px 0 var(--ink);
+  --shadow-sm: 4px 4px 0 var(--ink);
+  --shadow-lg: 9px 9px 0 var(--ink);
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html { scroll-behavior: smooth; }
 body {
-  font-family: 'Inter', system-ui, sans-serif;
-  background: var(--vb);
-  color: var(--sw);
+  font-family: 'General Sans', system-ui, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--b1); border-radius: 2px; }
+::selection { background: var(--sun); color: var(--ink); }
 
-/* Mesh bg */
-.mesh-bg::before {
-  content: '';
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+/* Scrollbar — chunky ink */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--paper2); }
+::-webkit-scrollbar-thumb { background: var(--ink); border: 2px solid var(--paper2); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAPER TEXTURE — fine grain + faint halftone dot field (no asset)
+   ═══════════════════════════════════════════════════════════════════ */
+.paper-grain::before {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  opacity: 0.55; mix-blend-mode: multiply;
+  background-image:
+    radial-gradient(rgba(26,26,23,0.16) 0.6px, transparent 0.7px);
+  background-size: 4px 4px;
+}
+/* soft riso colour wash drifting behind everything */
+.riso-wash::after {
+  content: ''; position: fixed; inset: -10%; z-index: 0; pointer-events: none;
+  opacity: 0.5;
   background:
-    radial-gradient(ellipse 70vw 60vh at 15% 0%,  rgba(124,92,252,0.12) 0%, transparent 65%),
-    radial-gradient(ellipse 50vw 50vh at 85% 0%,  rgba(124,92,252,0.07) 0%, transparent 65%),
-    radial-gradient(ellipse 60vw 40vh at 50% 100%, rgba(16,185,129,0.05) 0%, transparent 65%);
+    radial-gradient(40vw 38vh at 8% -4%,  rgba(43,68,255,0.10) 0%, transparent 60%),
+    radial-gradient(36vw 34vh at 94% 6%,  rgba(255,77,61,0.09) 0%, transparent 62%),
+    radial-gradient(44vw 36vh at 70% 102%, rgba(255,197,61,0.12) 0%, transparent 60%);
+  animation: washDrift 26s ease-in-out infinite alternate;
 }
+@keyframes washDrift { 0% { transform: translate3d(0,0,0); } 100% { transform: translate3d(-2%,1.5%,0); } }
 
-/* Glass card */
-.glass {
-  background: linear-gradient(135deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025));
-  border: 1px solid var(--b0);
+/* ═══════════════════════════════════════════════════════════════════
+   BRUTALIST PRIMITIVES — ink border + hard offset shadow
+   ═══════════════════════════════════════════════════════════════════ */
+.b-card {
+  background: var(--paper3);
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+.b-card-sm { border: 2px solid var(--ink); border-radius: 12px; box-shadow: var(--shadow-sm); }
+.b-flat    { border: 2px solid var(--ink); border-radius: 12px; }
+
+/* press-down interaction — card sinks toward its shadow on hover/active */
+.b-press { transition: transform 0.12s ease, box-shadow 0.12s ease; }
+.b-press:hover  { transform: translate(2px,2px); box-shadow: var(--shadow-sm); }
+.b-press:active { transform: translate(4px,4px); box-shadow: 2px 2px 0 var(--ink); }
+
+/* lift on hover (for tappable cards) */
+.b-lift { transition: transform 0.14s ease, box-shadow 0.14s ease; }
+.b-lift:hover { transform: translate(-2px,-2px); box-shadow: var(--shadow-lg); }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-family: 'General Sans', sans-serif; font-weight: 600; cursor: pointer;
+  border: 2px solid var(--ink); border-radius: 12px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease; }
+.btn-primary { background: var(--blue); color: #fff; box-shadow: var(--shadow-sm); }
+.btn-primary:hover  { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--ink); }
+.btn-primary:active { transform: translate(4px,4px); box-shadow: none; }
+.btn-coral { background: var(--coral); color: #fff; box-shadow: var(--shadow-sm); }
+.btn-coral:hover  { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--ink); }
+.btn-sun   { background: var(--sun); color: var(--ink); box-shadow: var(--shadow-sm); }
+.btn-sun:hover  { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--ink); }
+.btn-ink   { background: var(--ink); color: var(--paper); box-shadow: var(--shadow-sm); }
+.btn-ink:hover  { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--ink); }
+.btn-ghost { background: transparent; color: var(--ink); }
+.btn-ghost:hover { background: var(--paper2); }
+
+/* Legacy compat — `.glass*` panels used by not-yet-rewritten dashboard pages.
+   Remap to Campus Press paper cards so nothing renders transparent/broken. */
+.glass, .glass-2, .glass-3, .lglass, .lglass-iris {
+  background: var(--paper3);
+  border: 2px solid var(--ink);
+  box-shadow: var(--shadow-sm);
   position: relative;
-  overflow: hidden;
 }
-.glass::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(124,92,252,0.25), transparent);
-  pointer-events: none; z-index: 1;
+.btn-shimmer::after { content: none; } /* neutralise old shimmer overlay */
+
+/* ═══════════════════════════════════════════════════════════════════
+   STICKER TAGS — little rotated labels
+   ═══════════════════════════════════════════════════════════════════ */
+.sticker {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-family: 'JetBrains Mono', monospace; font-weight: 600;
+  font-size: 11px; letter-spacing: 0.02em; text-transform: lowercase;
+  padding: 4px 10px; border: 2px solid var(--ink); border-radius: 999px;
+  background: var(--sun); color: var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.sticker-coral { background: var(--coral); color: #fff; }
+.sticker-blue  { background: var(--blue);  color: #fff; }
+.sticker-paper { background: var(--paper3); color: var(--ink); }
+.tilt-l { transform: rotate(-3deg); }
+.tilt-r { transform: rotate(3deg); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   RISO HEADLINE — misregistered colour ghost behind ink text
+   ═══════════════════════════════════════════════════════════════════ */
+.riso-text { position: relative; display: inline-block; color: var(--ink); }
+.riso-text::before {
+  content: attr(data-text); position: absolute; left: -3px; top: 2px;
+  color: var(--coral); opacity: 0.55; z-index: -1; mix-blend-mode: multiply;
+  pointer-events: none;
+}
+.riso-text.riso-blue::before { color: var(--blue); }
+.riso-text.riso-sun::before  { color: var(--sun); }
+
+/* highlighter swipe behind a word */
+.mark-hi { background: linear-gradient(120deg, transparent 4%, var(--sun) 4%, var(--sun) 96%, transparent 96%);
+  padding: 0 0.12em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.mark-coral { background: linear-gradient(120deg, transparent 4%, rgba(255,77,61,0.85) 4%, rgba(255,77,61,0.85) 96%, transparent 96%); color: #fff; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   TYPOGRAPHY HELPERS
+   ═══════════════════════════════════════════════════════════════════ */
+.font-display { font-family: 'Clash Display', 'General Sans', sans-serif; }
+.font-body    { font-family: 'General Sans', system-ui, sans-serif; }
+.font-mono    { font-family: 'JetBrains Mono', monospace; }
+.eyebrow { font-family: 'JetBrains Mono', monospace; font-weight: 600;
+  font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   ANIMATION
+   ═══════════════════════════════════════════════════════════════════ */
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
+@keyframes spin   { to { transform: rotate(360deg) } }
+@keyframes pulse  { 0%,100% { opacity:1 } 50% { opacity:0.3 } }
+@keyframes blink  { 0%,100% { opacity:1 } 50% { opacity:0.2 } }
+.animate-fade-up   { animation: fadeUp 0.24s ease both; }
+.animate-spin-slow { animation: spin 0.7s linear infinite; }
+.animate-pulse-dot { animation: pulse 2s ease infinite; }
+.animate-blink     { animation: blink 1.4s ease infinite; }
+
+/* drifting backdrop motifs */
+@keyframes driftA { 0%,100% { transform: translate(0,0) rotate(var(--r,0deg)); } 50% { transform: translate(8px,-14px) rotate(calc(var(--r,0deg) + 6deg)); } }
+.drift { animation: driftA var(--d,13s) ease-in-out infinite; }
+
+/* Casper mascot motion */
+@keyframes casperFloat { 0%,100% { transform: translateY(0) rotate(-1.5deg) } 50% { transform: translateY(-12px) rotate(1.5deg) } }
+@keyframes casperPop   { 0% { transform: scale(1) } 30% { transform: scale(1.08) translateY(-8px) } 60% { transform: scale(0.98) } 100% { transform: scale(1) } }
+@keyframes casperShake { 0%,100% { transform: translateX(0) rotate(0) } 20% { transform: translateX(-5px) rotate(-3deg) } 40% { transform: translateX(5px) rotate(3deg) } 60% { transform: translateX(-4px) rotate(-2deg) } 80% { transform: translateX(4px) rotate(2deg) } }
+@keyframes casperAura  { 0%,100% { opacity: 0.55; transform: scale(1) } 50% { opacity: 0.9; transform: scale(1.1) } }
+/* Casper blinks on his own — squish the eye layer briefly. transform-box:view-box
+   makes the origin resolve in SVG viewBox units so the blink stays centred. */
+@keyframes casperBlink { 0%, 93%, 100% { transform: scaleY(1) } 96.5% { transform: scaleY(0.08) } }
+.casper-blink { transform-box: view-box; transform-origin: 552px 340px; animation: casperBlink 4.8s ease-in-out infinite; }
+.casper-float { animation: casperFloat 4.6s ease-in-out infinite; }
+.casper-pop   { animation: casperPop 0.7s ease; }
+.casper-shake { animation: casperShake 0.5s ease; }
+
+/* Live gauge motion */
+@keyframes gaugePulse { 0%,100% { opacity:1; transform:scale(1) } 50% { opacity:0.55; transform:scale(0.82) } }
+@keyframes gaugeSweep { from { stroke-dashoffset: var(--sweep-from) } to { stroke-dashoffset: var(--sweep-to) } }
+.animate-gauge-pulse { animation: gaugePulse 1.4s ease-in-out infinite; }
+
+/* marquee for region ticker */
+@keyframes marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+.animate-marquee { animation: marquee 22s linear infinite; }
+
+/* Skeleton shimmer */
+@keyframes skeleton { 0% { background-position: -200% 0 } 100% { background-position: 200% 0 } }
+.skeleton {
+  background: linear-gradient(90deg, rgba(26,26,23,0.05) 25%, rgba(26,26,23,0.10) 50%, rgba(26,26,23,0.05) 75%);
+  background-size: 200% 100%; animation: skeleton 1.4s ease-in-out infinite; border-radius: 8px;
 }
 
-/* Animations */
-@keyframes fadeUp   { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
-@keyframes ghostFloat { 0%,100% { transform:translateY(0) rotate(-1.5deg) } 50% { transform:translateY(-16px) rotate(1.5deg) } }
-@keyframes spin     { to { transform: rotate(360deg) } }
-@keyframes pulse    { 0%,100% { opacity:1 } 50% { opacity:0.3 } }
-@keyframes blink    { 0%,100% { opacity:1 } 50% { opacity:0.3 } }
-@keyframes shimmer  { from { left:-100% } to { left:100% } }
+/* Accessibility — visible focus ring */
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; border-radius: 6px; }
+:focus:not(:focus-visible) { outline: none; }
 
-.animate-fade-up    { animation: fadeUp 0.24s ease both; }
-.animate-ghost-float { animation: ghostFloat 4s ease-in-out infinite; }
-.animate-spin-slow  { animation: spin 0.7s linear infinite; }
-.animate-pulse-dot  { animation: pulse 2s ease infinite; }
-.animate-blink      { animation: blink 2s ease infinite; }
-
-/* Shimmer button effect */
-.btn-shimmer::after {
-  content: '';
-  position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
-  transition: left 0.5s ease;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important; animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important; scroll-behavior: auto !important;
+  }
 }
-.btn-shimmer:hover::after { left: 100%; }

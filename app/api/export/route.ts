@@ -7,7 +7,7 @@ import {
 
 function buildDocx(content: string, title: string, meta: Record<string,any> = {}): Promise<Buffer> {
   const { author = 'GhostWrite', style = 'academic', algo = 'std' } = meta
-  const algoLabel = algo === 'hyp' ? 'Hyper ⚡' : algo === 'pro' ? 'Pro' : 'Standard'
+  const algoLabel = algo === 'hyp' ? 'Hyper' : algo === 'pro' ? 'Pro' : 'Standard'
 
   // Split content into paragraphs
   const rawParas = content.split(/\n\n+/).filter(p => p.trim().length > 0)
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
     try {
       const buffer = await buildDocx(content, title, meta)
       const safeName = title.replace(/[^a-z0-9]/gi,'_').slice(0,40).toLowerCase()
-      return new NextResponse(buffer, {
+      return new NextResponse(new Uint8Array(buffer), {
         headers: {
           'Content-Type':        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           'Content-Disposition': `attachment; filename="${safeName}.docx"`,
