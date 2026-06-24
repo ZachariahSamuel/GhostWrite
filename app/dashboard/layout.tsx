@@ -61,15 +61,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setApiStatus(k ? 'loading' : 'none')
     if (k) testKey(k)
 
-    // TEMP PREVIEW BYPASS — local only (NEXT_PUBLIC_PREVIEW_BYPASS=true).
-    // Serves a demo user so the dashboard renders without a Supabase login.
-    // Off by default; remove this block before launch.
-    if (process.env.NEXT_PUBLIC_PREVIEW_BYPASS === 'true') {
-      setUser({ id: 'preview', email: 'preview@ghostwrite.app', name: 'Preview User',
-        plan: 'free', country: 'BW', credits_used: 240, credits_total: 1500 })
-      return
-    }
-
     const sb = createClient()
     sb.auth.getUser().then(({ data }) => {
       if (!data.user) { router.push('/login'); return }

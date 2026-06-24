@@ -27,13 +27,8 @@ export async function middleware(request: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession()
   const path = request.nextUrl.pathname
 
-  // TEMP PREVIEW BYPASS — local only. Set NEXT_PUBLIC_PREVIEW_BYPASS=true in
-  // .env.local to click through the dashboard without a Supabase login.
-  // Off by default; never enable in production. Remove this block before launch.
-  const previewBypass = process.env.NEXT_PUBLIC_PREVIEW_BYPASS === 'true'
-
   // Redirect unauthenticated users away from dashboard
-  if (path.startsWith('/dashboard') && !session && !previewBypass) {
+  if (path.startsWith('/dashboard') && !session) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
